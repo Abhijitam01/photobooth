@@ -9,13 +9,27 @@ import { ResultView } from './components/ResultView'
 import { UploadZone } from './components/UploadZone'
 import { KioskOverlay } from './components/KioskOverlay'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { StripView } from './pages/StripView'
 import type { Layout, FilterName } from './types'
 import { LAYOUT_FRAME_COUNT } from './types'
 
 const KIOSK_TIMEOUT_S = 30
+
+// Simple path-based routing for the public strip viewer
+const stripSlugMatch = window.location.pathname.match(/^\/s\/([a-z0-9]{8})$/i)
+const stripSlug = stripSlugMatch ? stripSlugMatch[1] : null
+
+// Router — render either the share page or the main booth
+export default function App() {
+  if (stripSlug) {
+    return <StripView slug={stripSlug} />
+  }
+  return <BoothApp />
+}
+
 const isKiosk = new URLSearchParams(window.location.search).has('kiosk')
 
-export default function App() {
+function BoothApp() {
   const [store, dispatch] = useReducer(reducer, initialState)
   const capturedFramesRef = useRef<ImageBitmap[]>([])
   const jpegFramesRef = useRef<string[]>([])

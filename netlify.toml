@@ -3,3 +3,9 @@
   [headers.values]
     Cross-Origin-Opener-Policy = "same-origin"
     Cross-Origin-Embedder-Policy = "require-corp"
+
+# SPA fallback — serves index.html for all routes (including /s/:slug)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

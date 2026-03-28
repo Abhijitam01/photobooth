@@ -11,12 +11,31 @@ interface Props {
   isKiosk: boolean
 }
 
+const WORKER_URL = import.meta.env.VITE_WORKER_URL ?? ''
+
+async function uploadStrip(blob: Blob): Promise<string | null> {
+  if (!WORKER_URL) return null
+  try {
+    const res = await fetch(`${WORKER_URL}/upload`, {
+      method: 'POST',
+      headers: { 'content-type': blob.type || 'image/png' },
+      body: blob,
+    })
+    if (!res.ok) return null
+    const json = await res.json() as { url?: string }
+    return json.url ?? null
+  } catch {
+    return null
+  }
+}
+
 const GIF_AVAILABLE = isGifAvailable()
 
 export function ResultView({ resultBlob, gifBlob, gifProgress, dispatch, onExportGif, isKiosk }: Props) {
   const [stripUrl, setStripUrl] = useState<string | null>(null)
   const [gifUrl, setGifUrl] = useState<string | null>(null)
   const [qrDataUri, setQrDataUri] = useState<string | null | 'loading'>('loading')
+  const [shareState, setShareState] = useState<'idle' | 'uploading' | 'copied' | 'error'>('idle')
   const stripUrlRef = useRef<string | null>(null)
   const gifUrlRef = useRef<string | null>(null)
 
@@ -77,6 +96,32 @@ export function ResultView({ resultBlob, gifBlob, gifProgress, dispatch, onExpor
 
   const handleNewSession = () => {
     dispatch({ type: 'RESET' })
+  }
+
+  const handleShare = async () => {
+    setShareState('uploading')
+    const shareUrl = await uploadStrip(resultBlob)
+    if (!shareUrl) {
+      setShareState('error')
+      setTimeout(() => setShareState('idle'), 3000)
+      return
+    }
+
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: 'My Photo Strip', url: shareUrl })
+        setShareState('idle')
+      } catch {
+        // User cancelled or share failed — fall back to clipboard
+        await navigator.clipboard.writeText(shareUrl).catch(() => {})
+        setShareState('copied')
+        setTimeout(() => setShareState('idle'), 3000)
+      }
+    } else {
+      await navigator.clipboard.writeText(shareUrl).catch(() => {})
+      setShareState('copied')
+      setTimeout(() => setShareState('idle'), 3000)
+    }
   }
 
   const isExportingGif = gifProgress > 0 && gifProgress < 100
@@ -163,6 +208,26 @@ export function ResultView({ resultBlob, gifBlob, gifProgress, dispatch, onExpor
         >
           Download PNG
         </button>
+
+        {WORKER_URL && (
+          <button
+            onClick={handleShare}
+            disabled={shareState === 'uploading'}
+            aria-label="Share strip"
+            className="px-6 py-3 rounded-full font-medium"
+            style={{
+              background: 'var(--color-accent)',
+              color: '#000',
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.9375rem',
+              minHeight: 48,
+              opacity: shareState === 'uploading' ? 0.7 : 1,
+              cursor: shareState === 'uploading' ? 'wait' : 'pointer',
+            }}
+          >
+            {shareState === 'uploading' ? 'Uploading...' : shareState === 'copied' ? 'Link copied!' : shareState === 'error' ? 'Share failed' : 'Share'}
+          </button>
+        )}
 
         {GIF_AVAILABLE && !gifBlob && !isExportingGif && (
           <button

@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+import { vi } from 'vitest'
 
 // Mock URL.createObjectURL / revokeObjectURL (jsdom doesn't implement these)
 global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')

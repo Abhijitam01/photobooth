@@ -1,0 +1,19 @@
+name = "photobooth-worker"
+main = "worker/index.ts"
+compatibility_date = "2024-01-01"
+
+[[r2_buckets]]
+binding = "STRIPS"
+bucket_name = "photobooth-strips"
+
+# Local dev: `wrangler dev`
+# Deploy: `wrangler deploy`
+#
+# First-time setup:
+#   wrangler r2 bucket create photobooth-strips
+#   wrangler deploy
+#
+# The worker will be available at:
+#   https://photobooth-worker.<your-subdomain>.workers.dev
+#
+# Update VITE_WORKER_URL in your .env (or netlify/vercel env vars) to point there.

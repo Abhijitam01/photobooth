@@ -65,7 +65,6 @@ export async function encodeGif(
 
           let enc: InstanceType<typeof GifEncoder>
           try {
-            const workerCount = typeof SharedArrayBuffer !== 'undefined' ? 2 : 1
             enc = new GifEncoder(width, height, 'neuquant', true, jpegDataUrls.length)
             enc.setDelay(GIF_FRAME_DELAY)
             enc.setRepeat(0) // Loop forever

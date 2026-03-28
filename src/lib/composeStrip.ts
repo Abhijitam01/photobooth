@@ -62,9 +62,6 @@ async function drawWithCtxFilter(
 
   if (layout === '2x2') {
     // 2×2 grid: 2 columns, 2 rows
-    const halfW = w / 2
-    const halfH = frameH // frameH = h/4, but for 2x2 layout h/2
-    // Recalculate for 2x2: 2 frames per row, 2 rows
     const cellH = ctx.canvas.height / 2
     const cellW = w / 2
     for (let i = 0; i < Math.min(frames.length, frameCount); i++) {
