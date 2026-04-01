@@ -2,7 +2,7 @@
 
 A zero-friction, browser-based photo booth. Walk up, take photos, download a beautiful strip — no signup, no backend, no install. Just a URL.
 
-Live demo: deploy to Netlify or Vercel in one click (see below).
+Live demo: 
 
 ---
 
